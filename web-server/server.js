@@ -10,6 +10,11 @@ wss.on("connection", ws => {
     // sending message
     ws.on("message", data => {
         console.log(`Client has sent us: ${data}`)
+          ws.clients.forEach(function each(client) {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(message);
+          }
+    });
     });
     // handling what to do when clients disconnects from server
     ws.on("close", () => {
