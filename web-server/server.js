@@ -1,67 +1,23 @@
-const express = require('express');
-const app = express();
-const server = require('http').Server(app);
-const url = require('url');
-
-const WebSocket = require('ws');
-
-const port = 3000;
-
-const express_config= require('./config/express.js');
-
-express_config.init(app);
-
-const wss1 = new WebSocket.Server({ noServer: true });
-const wss2 = new WebSocket.Server({ noServer: true });
-
-
-
-var cameraArray={};
-
-//esp32cam websocket
-wss1.on('connection', function connection(ws) {
-  ws.on('message', function incoming(message) {
-    wss2.clients.forEach(function each(client) {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
+// Importing the required modules
+const WebSocketServer = require('ws');
+ 
+// Creating a new websocket server
+const wss = new WebSocketServer.Server({ port: 3000 })
+ 
+// Creating connection using websocket
+wss.on("connection", ws => {
+    console.log("new client connected");
+    // sending message
+    ws.on("message", data => {
+        console.log(`Client has sent us: ${data}`)
     });
-  });
-});
-
-//webbrowser websocket
-wss2.on('connection', function connection(ws) {
-  ws.on('message', function incoming(message) {
-  	// nothing here should be received
-    console.log('received wss2: %s', message);
-  });
-});
-
-server.on('upgrade', function upgrade(request, socket, head) {
-  const pathname = url.parse(request.url).pathname;
-
-  if (pathname === '/jpgstream_server') {
-    wss1.handleUpgrade(request, socket, head, function done(ws) {
-      wss1.emit('connection', ws, request);
+    // handling what to do when clients disconnects from server
+    ws.on("close", () => {
+        console.log("the client has connected");
     });
-  } else if (pathname === '/jpgstream_client') {
-    wss2.handleUpgrade(request, socket, head, function done(ws) {
-      wss2.emit('connection', ws, request);
-    });
-  } else {
-    socket.destroy();
-  }
+    // handling client connection error
+    ws.onerror = function () {
+        console.log("Some Error occurred")
+    }
 });
-
-app.get("/", function (req, res) {
-    res.redirect("index.html")
-});
-
-app.use(express.static(__dirname + '/public'));
-
-
-server.listen(port, () => {
-	  console.log(`App listening at http://localhost:${port}`)
-})
-
-
+console.log("The WebSocket server is running on port 3000");
