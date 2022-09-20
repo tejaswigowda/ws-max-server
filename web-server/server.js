@@ -9,7 +9,6 @@ wss.on("connection", ws => {
     console.log("new client connected");
     // sending message
     ws.on("message", data => {
-        console.log(`Client has sent us: ${data}`)
           wss.clients.forEach(function each(client) {
           //if (client.readyState === WebSocket.OPEN) {
             client.send(data);
