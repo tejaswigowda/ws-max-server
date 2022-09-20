@@ -15,19 +15,15 @@ function anypost(str) {
 }
 
 
-const wss = new WebSocket.Server({ port: 3000})
+const ws = new WebSocket('ws://34.212.143.4:3000/');
 
-wss.on('connection', ws => {
-  ws.on('message', message => {
-    // anypost(`${message}`)
-	var x = `${message}`
-    x = x.replace(/\\/g, ""); 
+ws.on('open', function open() {
+  ws.send('something');
+});
 
-  // x = x.replace(/\"/g, ""); 
-		anypost( x)
+ws.on('message', function message(data) {
+  console.log('received: %s', data);
+  Max.outlet(data)
+	anypost(data)
 
-//	x = JSON.parse(x);
-	Max.outlet(x)
-  })
-  ws.send('start');
-})
+});
